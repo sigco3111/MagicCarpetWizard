@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
+.tools/
+
+# Raw working material, not shipped assets (see public/audio for the mixed-down versions)
+slumbr/
+sounds/

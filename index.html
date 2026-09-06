@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#172b37" />
+    <meta name="description" content="작은 구 세계 위를 날아가는 매직카펫 3D 무한 아케이드 비행 게임. 지붕을 스치며 룬을 빛내고, 지평선을 쫓아가세요." />
+    <title>매직 카펫 위저드 — 천 개의 하늘</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%231b3140'/%3E%3Cpath d='M10 39 27 17 54 25 37 48Z' fill='%23d98f65' stroke='%23f5d38b' stroke-width='3'/%3E%3Cpath d='m24 35 8-9 10 5-7 8Z' fill='%2349aaa5'/%3E%3C/svg%3E" />
+  </head>
+  <body>
+    <canvas id="world" tabindex="0" aria-label="매직 카펫 3D 비행 게임"></canvas>
+    <div id="boss-veil" aria-hidden="true"></div>
+    <div id="time-veil" aria-hidden="true"></div>
+    <div id="threat-radar" hidden aria-hidden="true"></div>
+    <div id="vignette"></div>
+    <header class="topbar">
+      <a class="wordmark" href="./" aria-label="매직 카펫 위저드 홈으로"><span class="brand-seal">✦</span><span>매직 카펫<br><strong>위저드</strong></span></a>
+      <div class="journey"><span id="weather">✦ 황혼 시간 · 맑은 하늘</span><div><i></i><span id="zone-name">앰버 시티</span><i></i></div></div>
+      <div class="top-actions"><button id="sound" class="icon-button" aria-label="환경음과 효과음 켜기" title="환경음과 효과음 (M)">≋<span class="sound-slash"></span></button><button id="pause" class="icon-button" aria-label="게임 일시정지" title="일시정지 (Esc)" hidden>Ⅱ</button><button id="help-button" class="icon-button" aria-label="비행 가이드" title="비행 가이드">?</button></div>
+    </header>
+    <main>
+      <section id="start-screen" class="start-screen">
+        <div class="eyebrow"><span></span> 천 개의 하늘 <span></span></div>
+        <h1>매직 카펫<br><em>위저드</em><span class="title-star">✧</span></h1>
+        <p class="intro">조금의 장난. 조금의 마법.<br>끝없이 펼쳐진 세계가 발 아래에.</p>
+        <button id="start" class="primary-button"><span>하늘로 떠나라</span><span>↗</span></button>
+        <button id="race-button" class="race-entry">친구와 대결 <span>2인용 · 고스트 타임 트라이얼 ↗</span></button>
+        <p class="start-hint">엔터로 시작 <span>·</span> 헤드폰 권장</p>
+        <div class="best-line"><span>나의 최고 거리</span><strong id="menu-best">—</strong></div>
+        <a class="kofi-support" href="https://ko-fi.com/threapchills" target="_blank" rel="noopener noreferrer" aria-label="Ko-fi에서 매직 카펫 위저드 후원하기">♡ 다음 모험에 연료를 · Ko-fi ↗</a>
+      </section>
+      <section id="hud" hidden aria-label="비행 대시보드">
+        <div id="race-hud" hidden><span id="race-rider"></span><strong id="race-timer">0:00.000</strong><span id="race-target"></span><small id="race-ghost-label"></small><span id="race-split" role="status" aria-live="polite"></span></div>
+        <div id="boss-hud" hidden><strong id="boss-name"></strong><div id="boss-health-track" role="progressbar" aria-label="보스 체력" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="boss-health"></i></div><span id="boss-phase"></span></div>
+        <div class="route-progress"><div><i id="zone-progress"></i></div><span id="next-zone">1,280 m to 술탄의 정원</span></div>
+        <div class="run-stats"><span class="tiny-label" id="journey-stage">잔잔한 하늘</span><div><strong id="distance">0</strong><span>m</span></div><p><span id="score">0</span> <span class="tiny-label">점수</span></p><div id="hearts" aria-label="3 체력">♥ ♥ ♥</div></div>
+        <div class="chain"><span id="combo-label">리듬을 잡아라</span><strong id="combo">×1</strong><div class="chain-track"><i id="combo-bar"></i></div></div>
+        <div class="flight-meter"><div class="meter-heading"><span>✦ 스카이파이어</span><span id="power-value">25%</span></div><div class="power-track"><i id="power-bar"></i></div><p id="power-hint">낮게 날아 파워를 모아라</p></div>
+        <div class="focus-meter"><header><span>⌛ 모래시계</span><span id="focus-value">5.2s</span></header><div class="focus-track" id="focus-meter" role="progressbar" aria-label="슬로 모션 게이지" aria-valuemin="0" aria-valuemax="100" aria-valuenow="65"><i id="focus-bar"></i></div><span id="focus-state">우클릭 · 시간을 멈춰라</span></div>
+        <div class="speed"><strong id="speed-value">0</strong><span>km/h</span><div id="altitude">지상 2.0 m</div><em id="flight-mode">지붕 위를 꿈꾸며</em></div>
+        <div class="spell-tray" id="spell-tray"></div>
+        <div id="active-spell">파이어볼 · Lv 1 · 1 / 2 / 3 또는 Q</div>
+        <div id="combat-buffs"></div>
+        <div id="roll-ready">스페이스 · 롤 준비 완료</div>
+        <div class="bottom-hints"><span><kbd>W</kbd><kbd>S</kbd> 고도</span><span><kbd>A</kbd><kbd>D</kbd> 조향</span><span><kbd>스페이스</kbd> 롤</span><span><kbd>시프트</kbd> 스카이파이어</span><span><kbd>클릭</kbd> 시전</span><span><kbd>1–3</kbd> 마법</span></div>
+      </section>
+      <div id="zone-banner" class="zone-banner"><span>지평선 너머로</span><strong></strong><em></em></div>
+      <div id="toast" role="status" aria-live="polite"></div>
+      <div id="crosshair" hidden><i></i><b></b></div>
+      <div id="damage-flash"></div>
+      <div id="race-countdown" hidden aria-live="polite"></div>
+      <section id="race-setup" class="modal-backdrop" hidden>
+        <div class="modal race-card"><span class="eyebrow">하나의 카펫 · 두 명의 라이벌</span><h2>고스트를 <em>쫓아라.</em></h2>
+          <p>같은 코스를 번갈아 주행하며, 상대의 최고 기록과 대결하세요. 키보드를 넘기며 승부를 가릅니다.</p>
+          <div class="race-levels" role="group" aria-label="코스 난이도"><button id="race-easy" aria-pressed="true">이지</button><button id="race-medium" aria-pressed="false">보통</button><button id="race-hard" aria-pressed="false">어려움</button></div>
+          <p id="race-description"></p><small id="race-course"></small>
+          <div class="race-scores"><div><span>플레이어 1 · 시안</span><strong id="race-p1">—</strong></div><div><span>플레이어 2 · 로즈</span><strong id="race-p2">—</strong></div></div>
+          <p class="race-instructions">W / S 상승 · 하강 · A / D 조향 · SHIFT 부스트 · SPACE 롤<br>조준 후 클릭으로 길어채기를 깨뜨려라 · 1 / 2 / 3 마법 선택. 고스트는 부딪히지 않습니다. 우클릭으로 시간을 굽히다; 경주 시계는 실시간.<br>R 키로 같은 코스에서 재도전. 개인 최고 기록은 보존됩니다.<br>모든 게이트를 통과하면 +12 스카이파이어와 상대 기록이 보입니다. 충돌 시 마지막 체크포인트로 복귀; 시계는 계속 흐릅니다. 3분 제한.</p>
+          <button id="race-start" class="primary-button">플레이어 1 · 레이스 준비 ↗</button>
+          <div class="race-actions"><button id="race-swap" class="text-button">시작 플레이어 교체</button><button id="race-new" class="text-button">새 코스 · 기록 초기화</button><button id="race-back" class="text-button">뒤로</button></div>
+        </div>
+      </section>
+      <section id="race-results" class="modal-backdrop" hidden>
+        <div class="modal race-card"><span class="eyebrow">키보드를 넘겨라. 승부를 올려라.</span><h2 id="race-result-title"></h2><strong id="race-result-time" class="race-result-time"></strong><p id="race-result-copy"></p><div id="race-result-scores" class="race-result-scores"></div><p id="race-result-leader"></p>
+          <button id="race-next" class="primary-button"></button><button id="race-retry" class="text-button"></button>
+          <div class="race-actions"><button id="race-change" class="text-button">레이스 설정</button><button id="race-home" class="text-button">모험으로 돌아가기</button></div>
+        </div>
+      </section>
+      <section id="end-screen" class="modal-backdrop" hidden>
+        <div class="modal end-card"><span class="eyebrow">모든 끝이 또 다른 시작</span><h2>아름다운<br><em>근사의 위기.</em></h2><p id="end-copy">모래가 당신의 이야기를 간직하리라.</p><div class="end-stats"><div><strong id="end-distance">0</strong><span>비행한 미터</span></div><div><strong id="end-score">0</strong><span>획득 점수</span></div><div><strong id="end-combo">1×</strong><span>최고 콤보</span></div></div><p id="end-best"></p><button id="restart" class="primary-button"><span>또 다른 지평선</span><span>↗</span></button><button id="back-menu" class="text-button">하늘로 돌아가기</button></div></section>
+      <section id="pause-screen" class="modal-backdrop" hidden><div class="modal pause-card"><span class="eyebrow">구름 위의 한 순간</span><h2>잠시<br><em>숨을 고르자.</em></h2><button id="resume" class="primary-button"><span>다시 날다</span><span>↗</span></button><button id="pause-restart" class="text-button">새 여정 시작</button><button id="pause-menu" class="text-button">메뉴 / 레이스 설정으로</button></div></section>
+      <section id="help-screen" class="modal-backdrop" hidden><div class="modal guide"><button id="close-help" class="close-button" aria-label="가이드 닫기">×</button><span class="eyebrow">카펫 라이더의 손글씨 안내서</span><h2>작은 <em>팁과 노하우.</em></h2><div class="guide-grid"><div><h3>01 / 지면을 쫓아라</h3><p><kbd>W</kbd> 상승, <kbd>S</kbd> 하강. <kbd>A</kbd> <kbd>D</kbd> 조향. 낮은 비행이 빠르고 스카이파이어를 충전합니다. <kbd>SHIFT</kbd>를 눌러 부스트. 6–46m 고도에서 빛나는 절벽을 스치면 추가 속도와 파워. 건물은 피하세요.</p></div><div><h3>02 / 작은 마법을 부리라</h3><p>조준 후 클릭을 눌러 시전. <kbd>1</kbd> 파이어볼, <kbd>2</kbd> 라이트닝, <kbd>3</kbd> 윈드 블래스트; <kbd>Q</kbd>로 순환. 윈드는 적의 탄환을 튕겨내고 불타는 적을 강타합니다. 닥치는 탄환을 임팩트 직전 클릭으로 패리하여 송부. 프로스트는 파이어 샤터의 발판.</p></div><div><h3>03 / 흐름을 찾아라</h3><p><kbd>SPACE</kbd>로 4m 위에서 바렐 롤. 간근 통과, 금빛 링과 격파가 콤보를 쌓고 모래시계를 채웁니다. 우클릭으로 슬로 모션; 게이지가 남은 시간을 보여줍니다. 궁수 등장 시 5초 슬로 모션. 금빛 위습에 닿아 콤보를 이어가세요.</p></div><div><h3>04 / 더 밝게 타오르라</h3><p>몬스터를 처치해 전리품. 마법 레벨은 한 비행 내 유지; 래피드 파이어, 퓨리, 포커스, 오버드라이브는 시간제 부스트. 보스는 자체 속도로 비행: 공격하거나 스치거나 부스트로 추월. 스카라베는 두 개의 부서지기 쉬운 보호막; 다른 보스는 즉시 취약. 분홍 하트는 체력 회복; 푸른 보호막 하트는 회복과 무적. 자석은 18초, 중첩 시 최대 32초.</p></div></div><p class="guide-footer">Esc / P 일시정지 · R 재시작 · M 사운드 · 방향키도 사용 가능<br>마우스 & 키보드 전용. 세 개의 하트. 끝없는 지평선.</p><button id="guide-fly" class="primary-button"><span>알겠어. 날자.</span><span>↗</span></button></div></section>
+    </main>
+    <details id="audio-controls" class="audio-controls">
+      <summary>≋ 오디오 믹스</summary>
+      <label for="ambience-volume">환경음 <output id="ambience-level">85%</output></label>
+      <input id="ambience-volume" type="range" min="0" max="100" value="85" />
+      <label for="effects-volume">효과음 <output id="effects-level">80%</output></label>
+      <input id="effects-volume" type="range" min="0" max="100" value="80" />
+      <p id="audio-status" role="status">비행을 시작하면 사운드가 켜집니다 · M으로 미리 듣기</p>
+    </details>
+    <footer id="menu-footer"><span><i></i> 끝없는 작은 모험</span><span>낮게 스치고, 높게 꿈꾸라. <b>✧</b></span></footer>
+    <div id="loading"><span class="loading-star">✦</span><p>작은 마법을 엮는 중…</p></div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
