@@ -41,7 +41,7 @@ test('Take Flight unlocks audio before network work and starts audible ambience 
   assert.equal(await h.sound.start(), true); await flush(); h.sound.update(.3, { running: true });
   assert.equal(h.events[0], 'resume'); assert.ok(h.urls.every(url => url.startsWith('https://threapchills.github.io/MagicCarpetWizard/audio/')));
   assert.equal(h.sound.master.gain.value, .9); assert.equal(h.sound.ambienceBus.gain.value, .85); assert.equal(h.sound.effectBus.gain.value, .8);
-  assert.ok(h.sound.ambient.voices.size >= 3); assert.match(h.sound.status(), /Ambience playing/);
+  assert.ok(h.sound.ambient.voices.size >= 3); assert.match(h.sound.status(), /환경음 재생 중/);
   const air = [...h.sound.ambient.voices].find(v => v.role === 'air');
   assert.ok(air.level.gain.value >= .72);
   assert.ok(air.source.started); assert.ok(h.sound.effects.buffers.size === EFFECT_ASSETS.length);
@@ -68,7 +68,7 @@ test('race ambience continues across handoffs and pauses while mute remains auth
   const voices = h.sound.ambient.voices.size; assert.ok(voices > 0);
   h.sound.setPaused(true); h.sound.update(.3, { running: false, paused: true, keepAmbience: true });
   assert.equal(h.sound.ambienceBus.gain.value, .85); assert.equal(h.sound.effectBus.gain.value, 0); assert.ok(h.sound.ambient.voices.size >= voices);
-  assert.match(h.sound.status(), /Ambience playing/); await h.sound.start(); assert.equal(h.sound.ambient.voices.size >= voices, true);
+  assert.match(h.sound.status(), /환경음 재생 중/); await h.sound.start(); assert.equal(h.sound.ambient.voices.size >= voices, true);
   await h.sound.toggle(); assert.equal(h.sound.master.gain.value, 0); assert.equal(await h.sound.start(), false);
 });
 
@@ -95,7 +95,7 @@ test('sample effects deduplicate loads, throttle repeated events and keep at mos
 
 test('failed audio fetches are visible and all shipped effects are recordings, without synthesized fallback', async () => {
   const h = setup({ fetcher: async () => ({ ok: false }) }); await h.sound.start(); await flush(); h.sound.update(.3, {});
-  assert.match(h.sound.status(), /Ambience unavailable/);
+  assert.match(h.sound.status(), /환경음을 사용할 수 없음/);
   for (const asset of EFFECT_ASSETS) assert.ok((await stat(new URL(`../public/audio/effects/${asset}.mp3`, import.meta.url))).size > 1000);
   const source = await readFile(new URL('../src/audio.js', import.meta.url), 'utf8');
   const effects = await readFile(new URL('../src/sample-effects.js', import.meta.url), 'utf8');
